@@ -118,9 +118,9 @@ class Normal(nn.Module):
         else:
             # self.branch_short_cut = lambda x: x
             self.branch_short_cut = nn.Sequential()
-            
+
         self.relu_merge = nn.ReLU(inplace=True)
-            
+
         return
 
     def forward(self, x):
@@ -179,9 +179,9 @@ class Bottleneck(nn.Module):
         else:
             # self.branch_short_cut = lambda x: x
             self.branch_short_cut = nn.Sequential()
-            
+
         self.relu_merge = nn.ReLU(inplace=True)
-        
+
         return
 
     def forward(self, x):
@@ -217,6 +217,7 @@ class BlockGroup(nn.Module):
 class Flatten(nn.Module):
     def forward(self, x):
         return x.view(x.shape[0], -1)
+
 
 class ResNet(nn.Module):
     def __init__(self, in_channels: int, building_block_name: str, block_group_sizes: list or tuple, num_classes: int, device=None, dtype=None):
