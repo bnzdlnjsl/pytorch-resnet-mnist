@@ -40,6 +40,7 @@ def output_summary_old(resnet_size: int, output_path="summary\\"):
             print(s2)
             break
 
+# output_summary_old(152)
 
 def output_summary(resnet_size: int, output_path="summary\\"):
     if not exists(output_path):
@@ -67,13 +68,55 @@ def output_summary(resnet_size: int, output_path="summary\\"):
     with open(output_file, 'w', encoding='utf8') as f:
         f.write(str(model_stats))
 
+# output_summary(152)
 
 def summary_all():
     size_list = [18, 34, 50, 101, 152]
     for size in size_list:
         output_summary(size)
 
+# summary_all()
 
-# output_summary_old(152)
-# output_summary(152)
-summary_all()
+def understand_module_forward_implementaion():
+    class TrashModule(nn.Module):
+        def __init__(self):
+            super(TrashModule, self).__init__()
+            return
+        def this_is_another_forward(x):
+            pass
+        
+    # print(type(TrashModule().forward))
+    # print(TrashModule().forward.__name__ == nn.modules.module._forward_unimplemented.__name__)
+    print(TrashModule().forward.__name__)
+
+# understand_module_forward_implementaion()
+
+def the_keyword_yield():
+    def my_generator():
+        for i in range(10):
+            yield i * i
+    
+    # print(type(my_generator()))
+    gen = my_generator()
+    # print(type(gen))
+    for i in gen:
+        print(i)
+
+# the_keyword_yield()
+
+def method_parameters_and_instance_variable_weight():
+    
+    some_module = nn.Linear(128, 256)
+    
+    print("- weight:")
+    print("\t", type(some_module.weight), some_module.weight.size())
+    
+    print("- all parameters:")
+    for param in some_module.parameters():
+        print("\t", type(param), param.size())
+        
+    print("- all parameters with their names:")
+    for name, param in some_module.named_parameters():
+        print("\t", type(param), param.size(), name)
+
+# method_parameters_and_instance_variable_weight()
