@@ -303,23 +303,14 @@ class ResNet(nn.Module):
         )
         out_channels_pre = get_out_channels_pre(channel_level)
         """
-        Block group Conv3_x.
+        Block group Conv3_x - Conv5_x.
         """
-        channel_level *= 2
-        conv_3 = BBlockGroup(building_block_name, block_group_sizes[1], out_channels_pre, channel_level, 2, device=device, dtype=dtype)
-        out_channels_pre = get_out_channels_pre(channel_level)
-        """
-        Block group Conv4_x.
-        """
-        channel_level *= 2
-        conv_4 = BBlockGroup(building_block_name, block_group_sizes[2], out_channels_pre, channel_level, 2, device=device, dtype=dtype)
-        out_channels_pre = get_out_channels_pre(channel_level)
-        """
-        Block group Conv5_x.
-        """
-        channel_level *= 2
-        conv_5 = BBlockGroup(building_block_name, block_group_sizes[3], out_channels_pre, channel_level, 2, device=device, dtype=dtype)
-        out_channels_pre = get_out_channels_pre(channel_level)
+        conv_35 = []
+        for i in range(3):
+            channel_level *= 2
+            conv_i = BBlockGroup(building_block_name, block_group_sizes[i + 1], out_channels_pre, channel_level, 2, device=device, dtype=dtype)
+            conv_35.append(conv_i)
+            out_channels_pre = get_out_channels_pre(channel_level)
         """
         Global average pooling.
         """
@@ -335,13 +326,15 @@ class ResNet(nn.Module):
         fc = nn.Linear(out_channels_pre, num_classes, device=device, dtype=dtype)
         nn.init.kaiming_normal_(fc.weight)
 
+        """
+        For MNIST, the feature map size is already 1x1 right before the last
+        global average pooling, so disable it as we want.
+        """
         self.seq = nn.Sequential(
             conv_1,
             conv_2,
-            conv_3,
-            conv_4,
-            conv_5,
-            gap,
+            *conv_35,
+            # gap,
             flatten,
             fc
         )

@@ -4,9 +4,13 @@ from os.path import join, exists
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy
+import numpy as np
 from torchsummary import summary as summary_old
 from model.resnet import *
+from torchvision import datasets
+from torchvision import transforms
+from torch.utils.data import DataLoader
+from torch.utils.data import sampler
 
 
 def output_summary_old(resnet_size: int, output_path="summary\\"):
@@ -120,3 +124,72 @@ def method_parameters_and_instance_variable_weight():
         print("\t", type(param), param.size(), name)
 
 # method_parameters_and_instance_variable_weight()
+
+def MNIST_test():
+    ROOT = 'data'
+    batch_size = 128
+    train_dataset = datasets.MNIST(ROOT, train=True, transform=transforms.ToTensor(), download=True)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+    for idx, (x, y) in enumerate(train_loader):
+        print(idx, type(x), x.size(), x.dtype)
+        print(idx, type(y), y.size(), y.dtype)
+        break
+        
+        # if idx > (60000 // 128 + 3):
+        #     raise StopIteration("non-stop iteration on mnist")  # never reached, it does stop
+    
+# MNIST_test()
+    
+def CIFAR10_test():
+    NUM_TRAIN = 45000
+    transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+            ])
+    ROOT = 'data'
+    cifar10_train = datasets.CIFAR10(ROOT, train=True, download=True, transform=transform)
+    loader_train = DataLoader(cifar10_train, batch_size=64, sampler=sampler.SubsetRandomSampler(range(NUM_TRAIN)))
+
+    cifar10_val = datasets.CIFAR10(ROOT, train=True, download=True, transform=transform)
+    loader_val = DataLoader(cifar10_val, batch_size=64, sampler=sampler.SubsetRandomSampler(range(NUM_TRAIN, 50000)))
+
+    cifar10_test = datasets.CIFAR10(ROOT, train=False, download=True, transform=transform)
+    loader_test = DataLoader(cifar10_test, batch_size=64)
+
+# CIFAR10_test()
+
+def calculate_mnist_mean_and_std():
+    ROOT = 'data'
+    train_dataset = datasets.MNIST(ROOT, train=True, transform=transforms.ToTensor(), download=True)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=128)
+    test_dataset = datasets.MNIST(ROOT, train=False, transform=transforms.ToTensor(), download=True)
+    test_loader = DataLoader(dataset=train_dataset, batch_size=128)
+    mean = 0
+    for _, (x, _) in enumerate(train_loader):
+        x = x.numpy()
+        mean += np.sum(x)
+    for _, (x, _) in enumerate(test_loader):
+        x = x.numpy()
+        mean += np.sum(x)
+    mean /= 70000 * 28 * 28
+    std = 0
+    for _, (x, _) in enumerate(train_loader):
+        x = x.numpy()
+        std += np.sum(np.square(x - mean))
+    for _, (x, _) in enumerate(test_loader):
+        x = x.numpy()
+        std += np.sum(np.square(x - mean))
+    std /= 70000 * 28 * 28
+    std = np.sqrt(std)
+    print("mean: {:.16f}".format(mean)) # mean: 0.2239893917339536
+    print("std: {:.16f}".format(std))   # std: 0.4215089302415015
+
+# calculate_mnist_mean_and_std()
+
+def test_tensor_size_and_shape_type():
+    t = torch.zeros(8, 16)
+    print(type(t.size()))
+    print(type(t.shape))
+    print(t.shape == t.size())
+
+# test_tensor_size_and_shape_type()

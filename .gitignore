@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# cs231n assignment
+assignment2/
+
+# datasets
+data/
